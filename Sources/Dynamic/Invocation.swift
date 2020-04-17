@@ -102,6 +102,14 @@ class Invocation: Loggable {
             let method = unsafeBitCast(invocation.method(for: selector), to: signature)
             method(invocation, selector, self.selector)
         }
+
+        /// `[invocation retainArguments]`
+        do {
+            let selector = NSSelectorFromString("retainArguments")
+            let signature = (@convention(c)(NSObject, Selector) -> Void).self
+            let method = unsafeBitCast(invocation.method(for: selector), to: signature)
+            method(invocation, selector)
+        }
     }
 
     func setArgument(_ argument: Any?, at index: NSInteger) {

@@ -206,6 +206,7 @@ extension Dynamic {
         return value
     }
 
+	public var asString: String? { asObject?.description }
     public var asInt8: Int8? { unwrap() }
     public var asUInt8: UInt8? { unwrap() }
     public var asInt16: Int16? { unwrap() }
@@ -220,7 +221,6 @@ extension Dynamic {
     public var asInt: Int? { unwrap() }
     public var asUInt: UInt? { unwrap() }
     public var asSelector: Selector? { unwrap() }
-    public var asString: String? { asObject?.description }
 
     private func unwrap<T>() -> T? {
         guard let value = asValue else { return nil }
