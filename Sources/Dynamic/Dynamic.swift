@@ -55,12 +55,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
     public subscript(dynamicMember member: String) -> Dynamic {
         get {
-            log("Get:", "\(object?.debugDescription ?? "").\(member)")
-
-            let resolved = resolve()
-            log(.end)
-
-            return Dynamic(resolved, memberName: member)
+            return getProperty(member)
         }
         set {
             self[dynamicMember: member] = newValue.resolve()
@@ -72,13 +67,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
             return self[dynamicMember: member].unwrap()
         }
         set {
-            log("Set:", "\(object?.debugDescription ?? "").\(member)")
-
-            let resolved = resolve()
-            log(.end)
-
-            let setter = "set" + (member.first?.uppercased() ?? "") + member.dropFirst()
-            _ = Dynamic(resolved, memberName: setter).dynamicallyCall(withArguments: [newValue])
+            setProperty(member, value: newValue)
         }
     }
 
@@ -90,7 +79,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         guard let name = memberName else { return self }
 
         let selector = name + repeatElement(":", count: args.count).joined(separator: "_")
-        call(selector, with: args)
+        callMethod(selector, with: args)
         return self
     }
 
@@ -109,7 +98,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
                 return result + (pair.key + ":")
             }
         }
-        call(selector, with: pairs.map { $0.value })
+        callMethod(selector, with: pairs.map { $0.value })
         return self
     }
 
@@ -118,7 +107,26 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         return result.unwrap()
     }
 
-    private func call(_ selector: String, with arguments: [Any?] = []) {
+    private func getProperty(_ name: String) -> Dynamic {
+        log("Get:", "\(object?.debugDescription ?? "").\(name)")
+
+        let resolved = resolve()
+        log(.end)
+
+        return Dynamic(resolved, memberName: name)
+    }
+
+    private func setProperty<T>(_ name: String, value: T?) {
+        log("Set:", "\(object?.debugDescription ?? "").\(name)")
+
+        let resolved = resolve()
+        log(.end)
+
+        let setter = "set" + (name.first?.uppercased() ?? "") + name.dropFirst()
+        _ = Dynamic(resolved, memberName: setter).dynamicallyCall(withArguments: [value])
+    }
+
+    private func callMethod(_ selector: String, with arguments: [Any?] = []) {
         guard let target = object as? NSObject, !(object is Error) else { return }
         log("Call: [\(type(of: target)) \(selector)]")
 
@@ -170,7 +178,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
         /// This is a wrapped object with a member name. Return the member.
         if invocation?.isInvoked != true {
-            call(name)
+            callMethod(name)
         }
 
         return invocation?.returnedObject() ?? error as AnyObject?
@@ -206,7 +214,7 @@ extension Dynamic {
         return value
     }
 
-	public var asString: String? { asObject?.description }
+    public var asString: String? { asObject?.description }
     public var asInt8: Int8? { unwrap() }
     public var asUInt8: UInt8? { unwrap() }
     public var asInt16: Int16? { unwrap() }
