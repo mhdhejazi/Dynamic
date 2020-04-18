@@ -24,8 +24,8 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
     public var debugDescription: String { object?.debugDescription ?? "<nil>" }
 
-    public init(_ object: AnyObject?, memberName: String? = nil) {
-        self.object = object
+    public init(_ object: Any?, memberName: String? = nil) {
+        self.object = object as AnyObject?
         self.memberName = memberName
 
         log(.end).log(.start)
@@ -215,6 +215,8 @@ extension Dynamic {
         return value
     }
 
+    public var asArray: NSArray? { asObject as? NSArray }
+    public var asDictionary: NSDictionary? { asObject as? NSDictionary }
     public var asString: String? { asObject?.description }
     public var asInt8: Int8? { unwrap() }
     public var asUInt8: UInt8? { unwrap() }
