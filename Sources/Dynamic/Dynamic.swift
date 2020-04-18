@@ -141,7 +141,8 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         self.invocation = invocation
 
         for index in 0..<invocation.numberOfArguments - 2 {
-            let argument = arguments[index]
+            var argument = arguments[index]
+            argument = TypeMapping.convertToObjCType(arguments[index]) ?? argument
             invocation.setArgument(argument, at: index + 2)
         }
 
@@ -239,11 +240,19 @@ extension Dynamic {
             return nil
         }
 
-        if T.self is AnyObject.Type {
-            let encoding = invocation.returnTypeString
-            guard encoding == "^v" || encoding == "@" else {
-                return nil
+        let encoding = invocation.returnTypeString
+        if encoding == "^v" || encoding == "@" {
+            guard let object = value.nonretainedObjectValue else { return nil }
+
+            if type(of: object) is T.Type {
+                return value.nonretainedObjectValue as? T
             }
+
+            if let mappedType = TypeMapping.mappedType(for: T.self) as? AnyClass,
+            (object as AnyObject).isKind(of: mappedType) {
+                return TypeMapping.convertType(of: object) as? T
+            }
+
             return value.nonretainedObjectValue as? T
         }
 
