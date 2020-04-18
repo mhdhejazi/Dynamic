@@ -1,6 +1,11 @@
-# Dynamic
+![image](https://user-images.githubusercontent.com/121827/79637117-4961c880-8185-11ea-9014-5eb7fc9dc211.png)
+
+![Swift](https://img.shields.io/badge/Swift-5-orange?logo=Swift&logoColor=white)
+[![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 
 Dynamically access ObjC properties and call ObjC methods from Swift.
+
+## Table of contents
 
   * [Introduction](#introduction)
   * [How it works](#how-it-works)
