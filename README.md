@@ -3,7 +3,7 @@
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=Swift&logoColor=white)
 [![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 
-Dynamically access ObjC properties and call ObjC methods from Swift.
+A library that uses `@dynamicMemberLookup` and `@dynamicCallable` to access ObjC API the Swifty way.
 
 ## Table of contents
 
