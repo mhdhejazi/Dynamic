@@ -121,8 +121,23 @@ class Invocation: Loggable {
         let selector = NSSelectorFromString("setArgument:atIndex:")
         let signature = (@convention(c)(NSObject, Selector, UnsafeRawPointer, Int) -> Void).self
         let method = unsafeBitCast(invocation.method(for: selector), to: signature)
-        withUnsafePointer(to: argument) { pointer in
-            method(invocation, selector, pointer, index)
+
+        if let valueArgument = argument as? NSValue {
+            /// Get the type byte size
+            let typeSize = UnsafeMutablePointer<Int>.allocate(capacity: 1)
+            defer { typeSize.deallocate() }
+            NSGetSizeAndAlignment(valueArgument.objCType, typeSize, nil)
+
+            /// Get the actual value
+            let buffer = UnsafeMutablePointer<Int8>.allocate(capacity: typeSize.pointee)
+            defer { buffer.deallocate() }
+            valueArgument.getValue(buffer)
+
+            method(invocation, selector, buffer, index)
+        } else {
+            withUnsafePointer(to: argument) { pointer in
+                method(invocation, selector, pointer, index)
+            }
         }
     }
 
