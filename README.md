@@ -3,7 +3,7 @@
 ![Swift](https://img.shields.io/badge/Swift-5-orange?logo=Swift&logoColor=white)
 [![SwiftPM compatible](https://img.shields.io/badge/SwiftPM-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 
-A library that uses `@dynamicMemberLookup` and `@dynamicCallable` to access ObjC API the Swifty way.
+A library that uses `@dynamicMemberLookup` and `@dynamicCallable` to access Objective-C API the Swifty way.
 
 ## Table of contents
 
@@ -19,7 +19,7 @@ A library that uses `@dynamicMemberLookup` and `@dynamicCallable` to access ObjC
 
 ## Introduction
 
-Assume we have the following ObjC class:
+Assume we have the following Objective-C class:
 ```objectivec
 @interface FooBar : NSObject
 - (NSString *)doSomethingWithFoo:(NSString *)foo bar:(NSString *)bar;
@@ -106,7 +106,7 @@ And now that we have the `Invocation` class in Swift, the solution is complete!
 
 ### Meta Invocation
 
-But wait! Can't we now just use `Dynamic` to create instances of the ObjC class `NSInvocation` in Swift and call its methods directly?
+But wait! Can't we now just use `Dynamic` to create instances of the Objective-C class `NSInvocation` in Swift and call its methods directly?
 Absolutely!
 ```swift
 let methodSignature: NSObject? = Dynamic(fooBar).methodSignatureForSelector(selector)
@@ -213,6 +213,10 @@ let package = Package(
     ]
 )
 ```
+
+## Known issues
+
+Calling a method with an Objective-C **block** argument is not supported (See [issue #1](https://github.com/mhdhejazi/Dynamic/issues/1)). Swift closures are entirely a different thing than Objective-C blocks, and [a bridging header will be required](https://academy.realm.io/posts/altconf-nikita-lutsenko-objc-swift-interoperability/#pitfalls-of-bridging-swift-and-objective-c-2122) to convert between them.
 
 ## TODO
 
