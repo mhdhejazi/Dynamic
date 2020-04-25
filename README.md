@@ -181,6 +181,19 @@ var asUInt: UInt? { get }
 var asSelector: Selector? { get }
 ```
 
+### Objective-C block arguments
+
+To pass a Swift closure as a block argument you need to add `@convention(block)` to the closure type:
+```swift
+typealias ResultBlock = @convention(block) (_ result: Int) -> Void
+```
+Now, just cast the closure to this type when passing it:
+```swift
+panel.beginSheetModalForWindow(window, completionHandler: { result in
+    print("result: ", result)
+} as ResultBlock)
+```
+
 ### Logging
 
 It's always good to understand what's happening under the hood - be it to debug a problem or just out of curiosity.
@@ -213,10 +226,6 @@ let package = Package(
     ]
 )
 ```
-
-## Known issues
-
-Calling a method with an Objective-C **block** argument is not supported (See [issue #1](https://github.com/mhdhejazi/Dynamic/issues/1)). Swift closures are entirely a different thing than Objective-C blocks, and [a bridging header will be required](https://academy.realm.io/posts/altconf-nikita-lutsenko-objc-swift-interoperability/#pitfalls-of-bridging-swift-and-objective-c-2122) to convert between them.
 
 ## TODO
 
