@@ -284,6 +284,9 @@ extension Dynamic {
     public var asCGAffineTransform: CGAffineTransform? { unwrap() }
     public var asUIEdgeInsets: UIEdgeInsets? { unwrap() }
     public var asUIOffset: UIOffset? { unwrap() }
+
+    #if !os(watchOS)
     public var asCATransform3D: CATransform3D? { unwrap() }
+    #endif
 }
 #endif
