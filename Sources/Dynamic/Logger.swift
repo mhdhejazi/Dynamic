@@ -69,7 +69,7 @@ class Logger {
 
     @discardableResult
     func log(_ items: Any..., withBullet: Bool = true) -> Logger {
-        return log(items, withBullet: withBullet)
+        log(items, withBullet: withBullet)
     }
 
     @discardableResult
@@ -107,11 +107,11 @@ class Logger {
 class DummyLogger: Logger {
     @discardableResult
     override func log(_ items: [Any], withBullet: Bool = true) -> Logger {
-        return self
+        self
     }
 
     @discardableResult
     override func log(_ group: Group) -> Logger {
-        return self
+        self
     }
 }

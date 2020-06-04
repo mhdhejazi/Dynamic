@@ -55,7 +55,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
     public subscript(dynamicMember member: String) -> Dynamic {
         get {
-            return getProperty(member)
+            getProperty(member)
         }
         set {
             self[dynamicMember: member] = newValue.resolve()
@@ -64,7 +64,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
     public subscript<T>(dynamicMember member: String) -> T? {
         get {
-            return self[dynamicMember: member].unwrap()
+            self[dynamicMember: member].unwrap()
         }
         set {
             setProperty(member, value: newValue)
@@ -88,6 +88,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         return result.unwrap()
     }
 
+    @discardableResult
     public func dynamicallyCall(withKeywordArguments pairs: KeyValuePairs<String, Any?>) -> Dynamic {
         guard let name = memberName else { return self }
 
@@ -102,6 +103,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         return self
     }
 
+    @discardableResult
     public func dynamicallyCall<T>(withKeywordArguments pairs: KeyValuePairs<String, Any?>) -> T? {
         let result: Dynamic = dynamicallyCall(withKeywordArguments: pairs)
         return result.unwrap()
@@ -123,7 +125,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         log(.end)
 
         let setter = "set" + (name.first?.uppercased() ?? "") + name.dropFirst()
-        _ = Dynamic(resolved, memberName: setter).dynamicallyCall(withArguments: [value])
+        Dynamic(resolved, memberName: setter)(value)
     }
 
     private func callMethod(_ selector: String, with arguments: [Any?] = []) {
