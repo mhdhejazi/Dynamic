@@ -71,25 +71,12 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         }
     }
 
-    public func dynamicallyCall(withArguments args: [Any?]) -> Dynamic {
+    @discardableResult
+    public func dynamicallyCall(withKeywordArguments pairs: KeyValuePairs<String, Any?>) -> Dynamic {
         if object is AnyClass? && memberName == nil {
             return `init`()
         }
 
-        guard let name = memberName else { return self }
-
-        let selector = name + repeatElement(":", count: args.count).joined(separator: "_")
-        callMethod(selector, with: args)
-        return self
-    }
-
-    public func dynamicallyCall<T>(withArguments args: [Any?]) -> T? {
-        let result: Dynamic = dynamicallyCall(withArguments: args)
-        return result.unwrap()
-    }
-
-    @discardableResult
-    public func dynamicallyCall(withKeywordArguments pairs: KeyValuePairs<String, Any?>) -> Dynamic {
         guard let name = memberName else { return self }
 
         let selector = name + pairs.reduce("") { result, pair in
@@ -249,15 +236,15 @@ extension Dynamic {
             guard let object = value.nonretainedObjectValue else { return nil }
 
             if type(of: object) is T.Type {
-                return value.nonretainedObjectValue as? T
+                return object as? T
             }
 
             if let mappedType = TypeMapping.mappedType(for: T.self) as? AnyClass,
-            (object as AnyObject).isKind(of: mappedType) {
+                (object as AnyObject).isKind(of: mappedType) {
                 return TypeMapping.convertType(of: object) as? T
             }
 
-            return value.nonretainedObjectValue as? T
+            return object as? T
         }
 
         var storedSize = 0

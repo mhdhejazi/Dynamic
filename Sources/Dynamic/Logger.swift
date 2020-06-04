@@ -8,29 +8,11 @@ import Foundation
 
 protocol Loggable: AnyObject {
     var loggingEnabled: Bool { get }
-    func print(_ items: Any...)
 }
 
 extension Loggable {
     var loggingEnabled: Bool { false }
     var logUsingPrint: Bool { true }
-
-    func print(_ items: Any...) {
-        guard logUsingPrint else {
-            switch items.count {
-            case 1: Swift.print(items[0])
-            case 2: Swift.print(items[0], items[1])
-            case 3: Swift.print(items[0], items[1], items[2])
-            case 4: Swift.print(items[0], items[1], items[2], items[3])
-            case 5: Swift.print(items[0], items[1], items[2], items[3], items[4])
-            default: Swift.print(items)
-            }
-            return
-        }
-
-        guard loggingEnabled else { return }
-        Logger.logger(for: self).log(items)
-    }
 
     @discardableResult
     func log(_ items: Any...) -> Logger {
