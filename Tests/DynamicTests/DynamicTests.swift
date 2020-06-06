@@ -160,27 +160,116 @@ final class DynamicTests: XCTestCase {
                        processInfo2.isOperatingSystemAtLeastVersion(version2), "Bool")
 
         let formatter1 = ObjC.NSDateFormatter()
-        XCTAssertTrue(type(of: formatter1) == Dynamic.self)
+        XCTAssertTrue(type(of: formatter1) == Dynamic.self, "Type should be Dynamic")
 
         let formatter2: NSObject? = ObjC.NSDateFormatter()
-        XCTAssertEqual(formatter2?.className, "NSDateFormatter")
+        XCTAssertEqual(formatter2?.className, "NSDateFormatter", "Value isn't unwrapped")
 
         let formatter3 = { () -> NSObject? in
             ObjC.NSDateFormatter()
         }()
-        XCTAssertEqual(formatter3?.className, "NSDateFormatter")
+        XCTAssertEqual(formatter3?.className, "NSDateFormatter", "Value isn't unwrapped")
 
         formatter1.dateFormat = ObjC("yyyy-MM-dd HH:mm:ss")
         let date = ObjC.NSDate(timeIntervalSince1970: 1_600_000_000)
         let string: String? = formatter1.stringFromDate(date)
         let newDate: Date? = formatter1.dateFromString(string)
-        XCTAssertEqual(date.asInferred(), newDate)
-        XCTAssertEqual(date.asObject, formatter1.dateFromString(formatter1.stringFromDate(date)))
+        XCTAssertEqual(date.asInferred(),
+                       newDate, "Value isn't unwrapped")
+
+        XCTAssertEqual(date.asObject,
+                       formatter1.dateFromString(formatter1.stringFromDate(date)), "Value isn't unwrapped")
     }
 
     func testEdgeCases() {
         let error = ObjC.NSDateFormatter().invalidMethod()
-        XCTAssertTrue(error.asObject is Error)
+        XCTAssertTrue(error.asObject is Error, "Calling non existing method should return error")
+
+        let errorChained = error.thisMethodCallHasNoEffect(123).randomProperty
+        XCTAssertTrue(errorChained === error, "Calling methods and properties form error should return the same object")
+
+        let null = ObjC(nil)
+        XCTAssertNil(null.asObject, "Wrapped nil should return nil")
+
+        let nullChained = null.thisMethodCallHasNoEffect(123).randomProperty
+        XCTAssertTrue(nullChained === null, "Calling methods and properties form <nil> should return the same object")
+
+        let formatter = ObjC.NSDateFormatter()
+        XCTAssertEqual(formatter.stringFromDate(Date()), "", "Should return an empty string")
+        formatter.dateFormat = ObjC("yyyy-MM-dd HH:mm:ss")
+        XCTAssertNotEqual(formatter.stringFromDate(Date()), "", "Should NOT return an empty string")
+
+        formatter.dateFormat = .nil
+        XCTAssertEqual(formatter.stringFromDate(Date()), "", "Should return an empty string")
+        formatter.dateFormat = ObjC("yyyy-MM-dd HH:mm:ss")
+        XCTAssertNotEqual(formatter.stringFromDate(Date()), "", "Should NOT return an empty string")
+
+        formatter.dateFormat = nil as String? // or String?.none
+        XCTAssertEqual(formatter.stringFromDate(Date()), "", "Should return an empty string")
+    }
+
+    func testAlternativeMethodNames() {
+        let formatter = ObjC.NSDateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        XCTAssertEqual(formatter.stringFromDate(Date()).asString,
+                       formatter.stringFrom(date: Date()), "Alternative methods should work as the original")
+
+        XCTAssertEqual(formatter.stringFromDate(Date()).asString,
+                       formatter.string(fromDate: Date()), "Alternative methods should work as the original")
+
+        let progress1 = ObjC.NSProgress.progressWithTotalUnitCount(99)
+        let progress2 = ObjC.NSProgress.progress(withTotalUnitCount: 99)
+        XCTAssertEqual(progress1.totalUnitCount.asInt,
+                       progress2.totalUnitCount.asInt, "Alternative methods should work as the original")
+    }
+
+    func testHiddenAPI() {
+        do {
+            let selector = NSSelectorFromString("lowercaseString")
+            let target = NSString("ABC")
+            let methodSignature: NSObject? = ObjC(target).methodSignatureForSelector(selector)
+            let invocation = ObjC.NSInvocation.invocationWithMethodSignature(methodSignature)
+            invocation.selector = selector
+            invocation.invokeWithTarget(target)
+            var result: NSString?
+            _ = withUnsafeMutablePointer(to: &result) { pointer in
+                invocation.getReturnValue(pointer)
+            }
+            XCTAssertEqual(result, "abc", "Can't use hidden API")
+            if let string = result {
+                _ = Unmanaged.passRetained(string).takeUnretainedValue()
+            }
+        }
+
+        do {
+            let selector = NSSelectorFromString("stringByPaddingToLength:withString:startingAtIndex:")
+            let target = NSString("ABC")
+            let methodSignature: NSObject? = ObjC(target).methodSignatureForSelector(selector)
+            let invocation = ObjC.NSInvocation.invocationWithMethodSignature(methodSignature)
+            invocation.selector = selector
+
+            let length: Int = 6
+            let padString = "0123" as NSString
+            let index: Int = 1
+            _ = withUnsafePointer(to: length) { pointer in
+                invocation.setArgument(pointer, atIndex: 2)
+            }
+            _ = withUnsafePointer(to: padString) { pointer in
+                invocation.setArgument(pointer, atIndex: 3)
+            }
+            _ = withUnsafePointer(to: index) { pointer in
+                invocation.setArgument(pointer, atIndex: 4)
+            }
+            invocation.invokeWithTarget(target)
+            var result: NSString?
+            _ = withUnsafeMutablePointer(to: &result) { pointer in
+                invocation.getReturnValue(pointer)
+            }
+            XCTAssertEqual(result, "ABC123", "Can't use hidden API")
+            if let string = result {
+                _ = Unmanaged.passRetained(string).takeUnretainedValue()
+            }
+        }
     }
 }
 

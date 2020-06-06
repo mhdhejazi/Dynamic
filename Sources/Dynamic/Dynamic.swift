@@ -18,6 +18,8 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
     }
     var loggingEnabled: Bool { Self.loggingEnabled }
 
+    public static let `nil` = Dynamic(nil)
+
     private let object: AnyObject?
     private let memberName: String?
 
@@ -69,7 +71,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
     @discardableResult
     public func dynamicallyCall(withKeywordArguments pairs: KeyValuePairs<String, Any?>) -> Dynamic {
         /// Constructors
-        if object is AnyClass?, memberName == nil {
+        if object is AnyClass, memberName == nil {
             if pairs.isEmpty {
                 return self.`init`.dynamicallyCall(withKeywordArguments: pairs)
             } else {
@@ -167,7 +169,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
     private func resolve() -> AnyObject? {
         /// This is a class. Return it.
-        if object is AnyClass? && memberName == nil {
+        if object is AnyClass && memberName == nil {
             return object
         }
 

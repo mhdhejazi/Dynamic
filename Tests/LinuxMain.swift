@@ -12,7 +12,9 @@ extension DynamicTests {
     ("testBlocks", testBlocks),
     ("testExplicitUnwrapping", testExplicitUnwrapping),
     ("testImplicitUnwrapping", testImplicitUnwrapping),
-    ("testEdgeCases", testEdgeCases)
+    ("testEdgeCases", testEdgeCases),
+    ("testAlternativeMethodNames", testAlternativeMethodNames),
+    ("testHiddenAPI", testHiddenAPI)
   ]
 }
 
