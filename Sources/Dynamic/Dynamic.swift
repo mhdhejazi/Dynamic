@@ -6,6 +6,8 @@
 
 import Foundation
 
+public typealias ObjC = Dynamic
+
 @dynamicCallable
 @dynamicMemberLookup
 public class Dynamic: CustomDebugStringConvertible, Loggable {
