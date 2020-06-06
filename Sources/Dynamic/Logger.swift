@@ -33,6 +33,7 @@ class Logger {
     }
 
     static let dummy = DummyLogger()
+    static var enabled = true
 
     private static var loggers: [ObjectIdentifier: Logger] = [:]
     private static var level: Int = 0
@@ -56,6 +57,8 @@ class Logger {
 
     @discardableResult
     func log(_ items: [Any], withBullet: Bool = true) -> Logger {
+        guard Self.enabled else { return self }
+
         let message = items.lazy.map { String(describing: $0) }.joined(separator: " ")
         var indent = String(repeating: " ╷  ", count: Self.level)
         if !indent.isEmpty, withBullet {
@@ -75,11 +78,15 @@ class Logger {
     }
 
     private func logGroupStart() {
+        guard Self.enabled else { return }
+
         log([" ╭╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴"], withBullet: false)
         Self.level += 1
     }
 
     private func logGroupEnd() {
+        guard Self.enabled else { return }
+
         guard Self.level > 0 else { return }
         Self.level -= 1
         log([" ╰╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴╴"], withBullet: false)
