@@ -42,7 +42,6 @@ class Invocation: Loggable {
         log(.start)
         log("# Invocation")
         log("[\(type(of: target)) \(selector)]")
-        log("Target:", target)
         log("Selector:", selector)
 
         try initialize()
