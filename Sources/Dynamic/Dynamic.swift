@@ -133,6 +133,11 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
         for index in 0..<invocation.numberOfArguments - 2 {
             var argument = arguments[index]
+
+            if let dynamicArgument = argument as? Dynamic {
+                argument = dynamicArgument.asObject
+            }
+
             argument = TypeMapping.convertToObjCType(arguments[index]) ?? argument
             invocation.setArgument(argument, at: index + 2)
         }
