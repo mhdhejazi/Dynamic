@@ -30,6 +30,9 @@ class Invocation: Loggable {
         /// `v` is the type encoding for Void
         returnTypeString != "v"
     }
+    lazy var returnedObject: AnyObject? = {
+        returnedObjectValue()
+    }()
     private(set) var isInvoked: Bool = false
 
     init(target: NSObject, selector: Selector) throws {
@@ -179,7 +182,7 @@ class Invocation: Loggable {
         }
     }
 
-    func returnedObject() -> AnyObject? {
+    private func returnedObjectValue() -> AnyObject? {
         guard returnsObject, returnLength > 0 else {
             return nil
         }
@@ -192,9 +195,23 @@ class Invocation: Loggable {
             return nil
         }
 
+        /// Take the ownership of the initialized objects to ensure they're deallocated properly.
+        if isRetainingMethod() {
+            return Unmanaged.passRetained(object).takeRetainedValue()
+        }
+
         /// `NSInvocation.getReturnValue()` doesn't give us the ownership of the returned object, but the compiler
         /// tries to release this object anyway. So, we are retaining it to balance with the compiler's release.
         return Unmanaged.passRetained(object).takeUnretainedValue()
+    }
+
+    private func isRetainingMethod() -> Bool {
+        /// Refer to: https://bit.ly/308okXm
+        let selector = NSStringFromSelector(self.selector)
+        return selector.hasPrefix("init") ||
+            selector.hasPrefix("new") ||
+            selector.hasPrefix("copy") ||
+            selector.hasPrefix("mutableCopy")
     }
 }
 
