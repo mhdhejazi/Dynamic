@@ -172,7 +172,11 @@ class Invocation: Loggable {
             }
         }
 
-        log("getReturnValue() ->", result)
+        if NSStringFromSelector(self.selector) == "alloc" {
+            log("getReturnValue() -> <alloc>")
+        } else {
+            log("getReturnValue() ->", result)
+        }
     }
 
     func returnedObject() -> AnyObject? {
