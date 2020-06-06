@@ -44,13 +44,6 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         log("Class:", className)
     }
 
-    public func `init`() -> Dynamic {
-        log("Init:", "\(object?.debugDescription ?? "").init()")
-        log(.end)
-
-        return Dynamic((object as? NSObject.Type)?.init())
-    }
-
     public static subscript(dynamicMember className: String) -> Dynamic {
         Dynamic(className: className)
     }
@@ -75,8 +68,20 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
     @discardableResult
     public func dynamicallyCall(withKeywordArguments pairs: KeyValuePairs<String, Any?>) -> Dynamic {
-        if object is AnyClass? && memberName == nil {
-            return `init`()
+        /// Constructors
+        if object is AnyClass? {
+            if let memberName = memberName {
+                if memberName.hasPrefix("init") == true {
+                    return Dynamic(object).alloc()[dynamicMember: memberName]
+                        .dynamicallyCall(withKeywordArguments: pairs)
+                }
+            } else {
+                if pairs.isEmpty {
+                    return self.alloc().`init`.dynamicallyCall(withKeywordArguments: pairs)
+                } else {
+                    return self.alloc().`initWith`.dynamicallyCall(withKeywordArguments: pairs)
+                }
+            }
         }
 
         guard let name = memberName else { return self }
