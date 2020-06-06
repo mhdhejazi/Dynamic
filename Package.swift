@@ -5,9 +5,9 @@ import PackageDescription
 let package = Package(
     name: "Dynamic",
     platforms: [
-        .macOS(.v10_10),
+        .macOS(.v10_12),
         .iOS(.v10),
-        .tvOS(.v9),
+        .tvOS(.v10),
         .watchOS(.v3)
     ],
     products: [
