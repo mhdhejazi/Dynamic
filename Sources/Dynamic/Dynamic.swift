@@ -268,18 +268,7 @@ extension Dynamic {
 
         let encoding = invocation.returnTypeString
         if encoding == "^v" || encoding == "@" {
-            guard let object = value.nonretainedObjectValue else { return nil }
-
-            if type(of: object) is T.Type {
-                return object as? T
-            }
-
-            if let mappedType = TypeMapping.mappedType(for: T.self) as? AnyClass,
-                (object as AnyObject).isKind(of: mappedType) {
-                return TypeMapping.convertType(of: object) as? T
-            }
-
-            return object as? T
+            return value.nonretainedObjectValue as? T
         }
 
         var storedSize = 0

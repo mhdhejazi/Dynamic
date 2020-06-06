@@ -5,7 +5,7 @@ import XCTest
 final class DynamicTests: XCTestCase {
     class override func setUp() {
         Dynamic.loggingEnabled = true
-        Logger.enabled = false
+//        Logger.enabled = false
     }
 
     func testInit() {
