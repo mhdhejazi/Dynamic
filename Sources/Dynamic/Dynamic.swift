@@ -161,7 +161,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         }
 
         /// This is a method we have called before. Return the result.
-        if let result = invocation?.returnedObject() {
+        if let result = invocation?.returnedObject {
             return result
         }
 
@@ -183,7 +183,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
             callMethod(name)
         }
 
-        return invocation?.returnedObject() ?? error as AnyObject?
+        return invocation?.returnedObject ?? error as AnyObject?
     }
 }
 
