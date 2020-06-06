@@ -100,6 +100,10 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         log("Get:", "\(object?.debugDescription ?? "").\(name)")
 
         let resolved = resolve()
+        if resolved == nil || resolved is Error {
+            return self
+        }
+
         log(.end)
 
         return Dynamic(resolved, memberName: name)
