@@ -183,7 +183,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 }
 
 extension Dynamic {
-    public var asObject: AnyObject? {
+    public var asAnyObject: AnyObject? {
         let result = resolve()
         log(.end)
         return result
@@ -211,9 +211,10 @@ extension Dynamic {
         return value
     }
 
-    public var asArray: NSArray? { asObject as? NSArray }
-    public var asDictionary: NSDictionary? { asObject as? NSDictionary }
-    public var asString: String? { asObject?.description }
+    public var asObject: NSObject? { asAnyObject as? NSObject }
+    public var asArray: NSArray? { asAnyObject as? NSArray }
+    public var asDictionary: NSDictionary? { asAnyObject as? NSDictionary }
+    public var asString: String? { asAnyObject?.description }
     public var asInt8: Int8? { unwrap() }
     public var asUInt8: UInt8? { unwrap() }
     public var asInt16: Int16? { unwrap() }
@@ -228,6 +229,8 @@ extension Dynamic {
     public var asInt: Int? { unwrap() }
     public var asUInt: UInt? { unwrap() }
     public var asSelector: Selector? { unwrap() }
+
+    public func asInferred<T>() -> T? { unwrap() }
 
     private func unwrap<T>() -> T? {
         guard let value = asValue else { return nil }
