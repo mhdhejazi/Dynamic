@@ -207,7 +207,7 @@ class Invocation: Loggable {
     private func isRetainingMethod() -> Bool {
         /// Refer to: https://bit.ly/308okXm
         let selector = NSStringFromSelector(self.selector)
-        return selector.hasPrefix("init") ||
+        return selector == "alloc" ||
             selector.hasPrefix("new") ||
             selector.hasPrefix("copy") ||
             selector.hasPrefix("mutableCopy")
