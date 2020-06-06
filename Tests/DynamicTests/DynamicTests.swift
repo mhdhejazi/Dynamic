@@ -15,11 +15,8 @@ final class DynamicTests: XCTestCase {
         XCTAssertEqual(formatter1.asObject?.className, className, "Parameterless init")
         XCTAssert(formatter1.asObject is DateFormatter, "Parameterless init - Bridging")
 
-        let formatter2 = ObjC.NSDateFormatter.alloc().`init`()
-        XCTAssertEqual(formatter2.asObject?.className, className, "Parameterless init with alloc")
-
-        let formatter3 = ObjC.NSDateFormatter.`init`()
-        XCTAssertEqual(formatter3.asObject?.className, className, "Parameterless init without alloc")
+        let formatter2 = ObjC.NSDateFormatter.`init`()
+        XCTAssertEqual(formatter2.asObject?.className, className, "Parameterless init with explicit init")
     }
 
     func testInitWithParameters() {
@@ -30,13 +27,9 @@ final class DynamicTests: XCTestCase {
         XCTAssertEqual(uuid1.asObject?.className, className, "Parameterized init")
         XCTAssertEqual(uuid1.UUIDString.asString, uuidString)
 
-        let uuid2 = ObjC.NSUUID.alloc().initWithUUIDString(uuidString)
-        XCTAssertEqual(uuid2.asObject?.className, className, "Parameterized init with alloc")
+        let uuid2 = ObjC.NSUUID.initWithUUIDString(uuidString)
+        XCTAssertEqual(uuid2.asObject?.className, className, "Parameterized init with explicit init")
         XCTAssertEqual(uuid2.UUIDString.asString, uuidString)
-
-        let uuid3 = ObjC.NSUUID.initWithUUIDString(uuidString)
-        XCTAssertEqual(uuid3.asObject?.className, className, "Parameterized init without alloc")
-        XCTAssertEqual(uuid3.UUIDString.asString, uuidString)
     }
 
     func testClassMethods() {

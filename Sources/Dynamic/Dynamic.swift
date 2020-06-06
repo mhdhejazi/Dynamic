@@ -69,18 +69,11 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
     @discardableResult
     public func dynamicallyCall(withKeywordArguments pairs: KeyValuePairs<String, Any?>) -> Dynamic {
         /// Constructors
-        if object is AnyClass? {
-            if let memberName = memberName {
-                if memberName.hasPrefix("init") == true {
-                    return Dynamic(object).alloc()[dynamicMember: memberName]
-                        .dynamicallyCall(withKeywordArguments: pairs)
-                }
+        if object is AnyClass?, memberName == nil {
+            if pairs.isEmpty {
+                return self.`init`.dynamicallyCall(withKeywordArguments: pairs)
             } else {
-                if pairs.isEmpty {
-                    return self.alloc().`init`.dynamicallyCall(withKeywordArguments: pairs)
-                } else {
-                    return self.alloc().`initWith`.dynamicallyCall(withKeywordArguments: pairs)
-                }
+                return self.`initWith`.dynamicallyCall(withKeywordArguments: pairs)
             }
         }
 
@@ -123,10 +116,17 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
     }
 
     private func callMethod(_ selector: String, with arguments: [Any?] = []) {
-        guard let target = object as? NSObject, !(object is Error) else { return }
+        guard var target = object as? NSObject, !(object is Error) else { return }
         log("Call: [\(type(of: target)) \(selector)]")
 
         var invocation: Invocation
+
+        /// Call `alloc()` before `init()`
+        if target is AnyClass, selector.hasPrefix("init") {
+            guard let allocated = allocate(type: target) else { return }
+            target = allocated
+        }
+
         do {
             invocation = try Invocation(target: target, selector: NSSelectorFromString(selector))
         } catch {
@@ -148,6 +148,17 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         }
 
         invocation.invoke()
+    }
+
+    private func allocate(type: NSObject) -> NSObject? {
+        do {
+            let invocation = try Invocation(target: type, selector: NSSelectorFromString("alloc"))
+            invocation.invoke()
+            return invocation.returnedObject as? NSObject
+        } catch {
+            self.error = error
+            return nil
+        }
     }
 
     private func resolve() -> AnyObject? {
@@ -185,6 +196,9 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
         return invocation?.returnedObject ?? error as AnyObject?
     }
+
+    @available(*, unavailable, message: "Call init() directly from the class name.")
+    public func alloc() {}
 }
 
 extension Dynamic {
