@@ -22,10 +22,10 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
 
     private let object: AnyObject?
     private let memberName: String?
-
     private var invocation: Invocation?
     private var error: Error?
 
+    public var isError: Bool { error != nil || object is Error }
     public var debugDescription: String { object?.debugDescription ?? "<nil>" }
 
     public init(_ object: Any?, memberName: String? = nil) {
@@ -122,7 +122,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
     }
 
     private func callMethod(_ selector: String, with arguments: [Any?] = []) {
-        guard var target = object as? NSObject, !(object is Error) else { return }
+        guard var target = object as? NSObject, !isError else { return }
         log("Call: [\(type(of: target)) \(selector)]")
 
         var invocation: Invocation
@@ -136,6 +136,7 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         do {
             invocation = try Invocation(target: target, selector: NSSelectorFromString(selector))
         } catch {
+            print("WARNING: Trying to access an unrecognized member: \(type(of: target)).\(selector)")
             self.error = error
             return
         }

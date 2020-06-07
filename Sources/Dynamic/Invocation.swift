@@ -55,7 +55,7 @@ class Invocation: Loggable {
             let signature = (@convention(c)(NSObject, Selector, Selector) -> Any).self
             let method = unsafeBitCast(target.method(for: selector), to: signature)
             guard let result = method(target, selector, self.selector) as? NSObject else {
-                let error = InvocationError.doesNotRecognizeSelector(type(of: target), self.selector)
+                let error = InvocationError.unrecognizedSelector(type(of: target), self.selector)
                 log("ERROR:", error)
                 throw error
             }
@@ -89,7 +89,7 @@ class Invocation: Loggable {
             let signature = (@convention(c)(AnyObject, Selector, AnyObject) -> AnyObject).self
             let method = unsafeBitCast(NSInvocation.method(for: selector), to: signature)
             guard let result = method(NSInvocation, selector, methodSignature) as? NSObject else {
-                let error = InvocationError.doesNotRecognizeSelector(type(of: target), self.selector)
+                let error = InvocationError.unrecognizedSelector(type(of: target), self.selector)
                 log("ERROR:", error)
                 throw error
             }
@@ -215,13 +215,13 @@ class Invocation: Loggable {
 }
 
 public enum InvocationError: CustomNSError {
-    case doesNotRecognizeSelector(_ classType: AnyClass, _ selector: Selector)
+    case unrecognizedSelector(_ classType: AnyClass, _ selector: Selector)
 
     public static var errorDomain: String { String(describing: Invocation.self) }
 
     public var errorCode: Int {
         switch self {
-        case .doesNotRecognizeSelector:
+        case .unrecognizedSelector:
             return 404
         }
     }
@@ -229,7 +229,7 @@ public enum InvocationError: CustomNSError {
     public var errorUserInfo: [String: Any] {
         var message: String
         switch self {
-        case .doesNotRecognizeSelector(let classType, let selector):
+        case .unrecognizedSelector(let classType, let selector):
             message = "'\(String(describing: classType))' doesn't recognize selector '\(selector)'"
         }
         return [NSLocalizedDescriptionKey: message]

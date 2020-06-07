@@ -184,6 +184,7 @@ final class DynamicTests: XCTestCase {
     func testEdgeCases() {
         let error = ObjC.NSDateFormatter().invalidMethod()
         XCTAssertTrue(error.asObject is Error, "Calling non existing method should return error")
+        XCTAssertTrue(error.isError, "isError should return true for errors")
 
         let errorChained = error.thisMethodCallHasNoEffect(123).randomProperty
         XCTAssertTrue(errorChained === error, "Calling methods and properties form error should return the same object")
