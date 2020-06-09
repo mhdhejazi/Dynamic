@@ -78,6 +78,17 @@ let result = Dynamic(toolbar)            // Wrap the object with Dynamic
 
 > More details on how the library is designed and how it works [here](https://medium.com/swlh/calling-ios-and-macos-hidden-api-in-style-1a924f244ad1).
 
+## Installation
+You can use [Swift Package Manager](https://swift.org/package-manager)  to install  `Dynamic`  by adding it in your  `Package.swift` :
+
+```swift
+let package = Package(
+    dependencies: [
+        .package(url: "https://github.com/mhdhejazi/Dynamic.git", branch: "master")
+    ]
+)
+```
+
 ## How to use
 The following diagram shows how we use Dynamic to access private properties and methods from the Objective-C object `obj`:
 ![Diagram](https://user-images.githubusercontent.com/121827/83970645-7312b280-a8df-11ea-87bf-d69682f8627d.png)
@@ -361,17 +372,6 @@ extension UIWindow {
 
 #### Swift: 5.0
 `Dynamic` uses the `@dynamicCallable` attribute which was introduced in Swift 5.
-
-## Installation
-You can use [Swift Package Manager](https://swift.org/package-manager)  to install  `Dynamic`  by adding it in your  `Package.swift` :
-
-```swift
-let package = Package(
-    dependencies: [
-        .package(url: "https://github.com/mhdhejazi/Dynamic.git", branch: "master")
-    ]
-)
-```
 
 ## Contribution
 Please feel free to contribute pull requests, or create issues for bugs and feature requests.
