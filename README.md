@@ -10,10 +10,10 @@ A library that uses `@dynamicMemberLookup` and `@dynamicCallable` to access Obje
 ## Table of contents
 
   * [Introduction](#introduction)
-  * [How to use](#how-to-use)
-  * [Use cases](#use-cases)
-  * [Requirements](#requirements)
+  * [Examples](#examples)
   * [Installation](#installation)
+  * [How to use](#how-to-use)
+  * [Requirements](#requirements)
   * [Contribution](#contribution)
   * [Author](#author)
 
@@ -77,6 +77,78 @@ let result = Dynamic(toolbar)            // Wrap the object with Dynamic
 ```
 
 > More details on how the library is designed and how it works [here](https://medium.com/swlh/calling-ios-and-macos-hidden-api-in-style-1a924f244ad1).
+
+## Examples
+The main use cases for  `Dynamic`  is accessing private/hidden iOS and macOS API in Swift. And with the introduction of Mac Catalyst, the need to access hidden API arose as Apple only made a very small portion of the macOS AppKit API visible to Catalyst apps.
+
+What follows are examples of how easy it is to access AppKit API in a Mac Catalyst with the help of Dynamic.
+
+#### 1. Enter fullscreen in a MacCatalyst app
+```swift
+// macOS App
+NSApplication.shared
+        .windows.first?
+        .toggleFullScreen(nil)
+
+// Mac Catalyst (with Dynamic)
+Dynamic.NSApplication.sharedApplication
+        .windows.firstObject
+        .toggleFullScreen(nil)
+```
+> Note the missing optional chaining operator `?` in the second code snippet. The reason is that Dynamic always returns a value when a property is accessed or a method is called. This eliminates the need for dealing with `nil`s as they will always be wrapped with a `Dynamic` object.
+
+#### 2. Get the `NSWindow` from a `UIWindow` in a MacCatalyst app
+```swift
+extension UIWindow {
+    var nsWindow: NSObject? {
+        Dynamic.NSApplication.sharedApplication.delegate.hostWindowForUIWindow(self)
+    }
+}
+```
+
+#### 3. Using `NSOpenPanel` in a MacCatalyst app
+```swift
+// macOS App
+let panel = NSOpenPanel()
+panel.beginSheetModal(for: view.window!, completionHandler: { response in
+    if let url: URL = panel.urls.first {
+        print("url: ", url)
+    }
+})
+
+// Mac Catalyst (with Dynamic)
+let panel = Dynamic.NSOpenPanel()
+panel.beginSheetModalForWindow(self.view.window!.nsWindow, completionHandler: { response in
+    if let url: URL = panel.URLs.firstObject {
+        print("url: ", url)
+    }
+} as ResponseBlock)
+
+typealias ResponseBlock = @convention(block) (_ response: Int) -> Void
+```
+
+#### 4. Change the window scale factor in MacCatalyst apps
+iOS views in Mac Catalyst apps are automatically scaled down to 77%. To change the scale factor we need to access a hidden property:
+```swift
+override func viewDidAppear(_ animated: Bool) {
+  view.window?.scaleFactor = 1.0 // Default value is 0.77
+}
+
+extension UIWindow {
+  var scaleFactor: CGFloat {
+    get {
+      Dynamic.NSApplication.sharedApplication
+        .windows.firstObject.contentView
+        .subviews.firstObject.scaleFactor ?? 1.0
+    }
+    set {
+      Dynamic.NSApplication.sharedApplication
+        .windows.firstObject.contentView
+        .subviews.firstObject.scaleFactor = newValue
+    }
+  }
+}
+```
 
 ## Installation
 You can use [Swift Package Manager](https://swift.org/package-manager)  to install  `Dynamic`  by adding it in your  `Package.swift` :
@@ -294,78 +366,6 @@ It's always good to understand what's happening under the hood - be it to debug 
 To enable extensive logging, simply change the `loggingEnabled` property to `true`:
 ```swift
 Dynamic.loggingEnabled = true
-```
-
-## Use cases
-The main use cases for  `Dynamic`  is accessing private/hidden iOS and macOS API in Swift. And with the introduction of Mac Catalyst, the need to access hidden API arose as Apple only made a very small portion of the macOS AppKit API visible to Catalyst apps.
-
-What follows are examples of how easy it is to access AppKit API in a Mac Catalyst with the help of Dynamic.
-
-#### 1. Enter fullscreen in a MacCatalyst app
-```swift
-// macOS App
-NSApplication.shared
-        .windows.first?
-        .toggleFullScreen(nil)
-
-// Mac Catalyst (with Dynamic)
-Dynamic.NSApplication.sharedApplication
-        .windows.firstObject
-        .toggleFullScreen(nil)
-```
-> Note the missing optional chaining operator `?` in the second code snippet. The reason is that Dynamic always returns a value when a property is accessed or a method is called. This eliminates the need for dealing with `nil`s as they will always be wrapped with a `Dynamic` object.
-
-#### 2. Get the `NSWindow` from a `UIWindow` in a MacCatalyst app
-```swift
-extension UIWindow {
-    var nsWindow: NSObject? {
-        Dynamic.NSApplication.sharedApplication.delegate.hostWindowForUIWindow(self)
-    }
-}
-```
-
-#### 3. Using `NSOpenPanel` in a MacCatalyst app
-```swift
-// macOS App
-let panel = NSOpenPanel()
-panel.beginSheetModal(for: view.window!, completionHandler: { response in
-    if let url: URL = panel.urls.first {
-        print("url: ", url)
-    }
-})
-
-// Mac Catalyst (with Dynamic)
-let panel = Dynamic.NSOpenPanel()
-panel.beginSheetModalForWindow(self.view.window!.nsWindow, completionHandler: { response in
-    if let url: URL = panel.URLs.firstObject {
-        print("url: ", url)
-    }
-} as ResponseBlock)
-
-typealias ResponseBlock = @convention(block) (_ response: Int) -> Void
-```
-
-#### 4. Change the window scale factor in MacCatalyst apps
-iOS views in Mac Catalyst apps are automatically scaled down to 77%. To change the scale factor we need to access a hidden property:
-```swift
-override func viewDidAppear(_ animated: Bool) {
-  view.window?.scaleFactor = 1.0 // Default value is 0.77
-}
-
-extension UIWindow {
-  var scaleFactor: CGFloat {
-    get {
-      Dynamic.NSApplication.sharedApplication
-        .windows.firstObject.contentView
-        .subviews.firstObject.scaleFactor ?? 1.0
-    }
-    set {
-      Dynamic.NSApplication.sharedApplication
-        .windows.firstObject.contentView
-        .subviews.firstObject.scaleFactor = newValue
-    }
-  }
-}
 ```
 
 ## Requirements
