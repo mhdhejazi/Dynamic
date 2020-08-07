@@ -102,8 +102,12 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         log("Get:", "\(object?.debugDescription ?? "").\(name)")
 
         let resolved = resolve()
-        if resolved == nil || resolved is Error {
+        if resolved is Error {
             return self
+        }
+
+        if resolved == nil {
+            return Self.nil
         }
 
         log(.end)

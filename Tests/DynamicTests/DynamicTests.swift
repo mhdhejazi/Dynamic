@@ -189,7 +189,7 @@ final class DynamicTests: XCTestCase {
         let errorChained = error.thisMethodCallHasNoEffect(123).randomProperty
         XCTAssertTrue(errorChained === error, "Calling methods and properties form error should return the same object")
 
-        let null = ObjC(nil)
+        let null = ObjC.nil
         XCTAssertNil(null.asObject, "Wrapped nil should return nil")
 
         let nullChained = null.thisMethodCallHasNoEffect(123).randomProperty
