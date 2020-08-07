@@ -66,6 +66,11 @@ final class DynamicTests: XCTestCase {
         let progress = ObjC.NSProgress.progressWithTotalUnitCount(100)
         progress.completedUnitCount = 50
         XCTAssertEqual(progress.fractionCompleted, 0.5, "Setting numeric properties")
+
+        let queue = ObjC.NSOperationQueue()
+        XCTAssertFalse(queue.isSuspended!)
+        queue.isSuspended = true
+        XCTAssertTrue(queue.isSuspended!, "Setting boolean properties with 'is' prefix")
     }
 
     func testBlocks() {

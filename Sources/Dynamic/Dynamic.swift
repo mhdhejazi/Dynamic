@@ -121,8 +121,14 @@ public class Dynamic: CustomDebugStringConvertible, Loggable {
         let resolved = resolve()
         log(.end)
 
-        let setter = "set" + (name.first?.uppercased() ?? "") + name.dropFirst()
-        Dynamic(resolved, memberName: setter)(value)
+        var setterName: String
+        if name.count > 2, name.hasPrefix("is"), name[name.index(name.startIndex, offsetBy: 2)].isUppercase {
+            setterName = "set" + name.dropFirst(2)
+        } else {
+            setterName = "set" + (name.first?.uppercased() ?? "") + name.dropFirst()
+        }
+
+        Dynamic(resolved, memberName: setterName)(value)
     }
 
     private func callMethod(_ selector: String, with arguments: [Any?] = []) {
