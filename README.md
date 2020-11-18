@@ -83,27 +83,26 @@ The main use cases for  `Dynamic`  is accessing private/hidden iOS and macOS API
 
 What follows are examples of how easy it is to access AppKit API in a Mac Catalyst with the help of Dynamic.
 
-#### 1. Enter fullscreen in a MacCatalyst app
-```swift
-// macOS App
-NSApplication.shared
-        .windows.first?
-        .toggleFullScreen(nil)
-
-// Mac Catalyst (with Dynamic)
-Dynamic.NSApplication.sharedApplication
-        .windows.firstObject
-        .toggleFullScreen(nil)
-```
-> Note the missing optional chaining operator `?` in the second code snippet. The reason is that Dynamic always returns a value when a property is accessed or a method is called. This eliminates the need for dealing with `nil`s as they will always be wrapped with a `Dynamic` object.
-
-#### 2. Get the `NSWindow` from a `UIWindow` in a MacCatalyst app
+#### 1. Get the `NSWindow` from a `UIWindow` in a MacCatalyst app
 ```swift
 extension UIWindow {
     var nsWindow: NSObject? {
-        Dynamic.NSApplication.sharedApplication.delegate.hostWindowForUIWindow(self)
+        var nsWindow = Dynamic.NSApplication.sharedApplication.delegate.hostWindowForUIWindow(self)
+        if #available(macOS 11, *) {
+            nsWindow = nsWindow.attachedWindow
+        }
+        return nsWindow.asObject
     }
 }
+```
+
+#### 2. Enter fullscreen in a MacCatalyst app
+```swift
+// macOS App
+window.toggleFullScreen(nil)
+
+// Mac Catalyst (with Dynamic)
+window.nsWindow.toggleFullScreen(nil)
 ```
 
 #### 3. Using `NSOpenPanel` in a MacCatalyst app
@@ -137,13 +136,11 @@ override func viewDidAppear(_ animated: Bool) {
 extension UIWindow {
   var scaleFactor: CGFloat {
     get {
-      Dynamic.NSApplication.sharedApplication
-        .windows.firstObject.contentView
+      Dynamic(view.window?.nsWindow).contentView
         .subviews.firstObject.scaleFactor ?? 1.0
     }
     set {
-      Dynamic.NSApplication.sharedApplication
-        .windows.firstObject.contentView
+      Dynamic(view.window?.nsWindow).contentView
         .subviews.firstObject.scaleFactor = newValue
     }
   }
